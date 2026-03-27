@@ -36,7 +36,7 @@
 /* USER CODE BEGIN PTD */
 MPU6050_Gyro_t gyro_data;
 
-MPU6050_Accel_t accel_data;
+MPU6050_Accel_t accel_data = {.az = 16384};
 /* USER CODE END PTD */
 
 /* Private define ------------------------------------------------------------*/
@@ -151,10 +151,10 @@ int main(void)
     debug_printf("GPS data, lat:%f, lat_dir:%c, lon:%f, lon_dir:%c, speed: %.4f, hdop: %.4f, date:%s, time:%s, sate:%d, fix_status: %d, timestamp: %.3f", gps_data.latitude, gps_data.lat_dir, gps_data.longitude, gps_data.long_dir, gps_data.speed_kph, gps_data.hdop, gps_data.date, gps_data.time, gps_data.satellites, gps_data.fix_status, gps_data.timestamp);
     HAL_Delay(1000); */
 
-    Int_MPU6050_Get_Gyro(&gyro_data);
-    debug_printf("gyro: %.4f, %.4f, %.4f", gyro_data.gx, gyro_data.gy, gyro_data.gz);
-    // Int_MPU6050_Get_Accel(&accel_data);
-    // debug_printf("acce: %.4f, %.4f, %.4f", accel_data.ax, accel_data.ay, accel_data.az);
+    // Int_MPU6050_Get_Gyro(&gyro_data, 1);
+    // debug_printf("gyro: %.4f, %.4f, %.4f", gyro_data.gx, gyro_data.gy, gyro_data.gz);
+    Int_MPU6050_Get_Accel(&accel_data, 1);
+    debug_printf("acce: %.4f, %.4f, %.4f", accel_data.ax, accel_data.ay, accel_data.az);
     HAL_Delay(10);
 
     /* USER CODE END WHILE */

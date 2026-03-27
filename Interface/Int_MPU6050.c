@@ -16,16 +16,16 @@ MPU6050_Accel_t cali_accel;
 void Int_MPU6050_Calibrate(void)
 {
   // 1.判断 角速度/角速度 是否稳定（静止状态）
-  MPU6050_Gyro_t temp_gyro;
-  MPU6050_Accel_t temp_accel;
+  MPU6050_Gyro_t temp_gyro = {0};
+  MPU6050_Accel_t temp_accel = {0};
   uint8_t count = 0;
   MPU6050_Gyro_t sum_50_gyro = {0};
   MPU6050_Accel_t sum_50_accel = {0};
   while (1)
   {
-    Int_MPU6050_Get_Gyro(&temp_gyro);
-    Int_MPU6050_Get_Accel(&temp_accel);
-    if (temp_gyro.gx < 300 && temp_gyro.gy < 300 && temp_gyro.gz < 300)
+    Int_MPU6050_Get_Gyro(&temp_gyro, 0);
+    Int_MPU6050_Get_Accel(&temp_accel, 0);
+    if (fabs(temp_gyro.gx) < 300 && fabs(temp_gyro.gy) < 300 && fabs(temp_gyro.gz) < 300)
     {
       if (count++ > 50) break;
 
@@ -36,7 +36,7 @@ void Int_MPU6050_Calibrate(void)
       // 加速度50次累加值
       sum_50_accel.ax += temp_accel.ax;
       sum_50_accel.ay += temp_accel.ay;
-      sum_50_accel.az += temp_accel.az;
+      sum_50_accel.az += (temp_accel.az - 16384);
 
       HAL_Delay(10);
     }
@@ -100,18 +100,33 @@ void Int_MPU6050_Init(void)
 }
 
 /**
- * @brief 获取陀螺仪数据
+ * @brief 获取陀螺仪数据（对角速度 抖动不大 使用一阶低通滤波）
  *
  * @param gyro_data
  */
-void Int_MPU6050_Get_Gyro(MPU6050_Gyro_t *gyro_data)
+void Int_MPU6050_Get_Gyro(MPU6050_Gyro_t *gyro_data, uint8_t filter_enable)
 {
   uint8_t buff[6] = {0};
   if (HAL_I2C_Mem_Read(&hi2c1, MPU6050_I2C_ADDR, MPU6050_GYRO_REG, I2C_MEMADD_SIZE_8BIT, buff, 6, 1000)== HAL_OK)
   {
-    gyro_data->gx = (int16_t)((buff[0] << 8) | buff[1]) - cali_gyro.gx;
-    gyro_data->gy = (int16_t)((buff[2] << 8) | buff[3]) - cali_gyro.gy;
-    gyro_data->gz = (int16_t)((buff[4] << 8) | buff[5]) - cali_gyro.gz;
+    MPU6050_Gyro_t temp_gyro = {0};
+    temp_gyro.gx = (int16_t)((buff[0] << 8) | buff[1]) - cali_gyro.gx;
+    temp_gyro.gy = (int16_t)((buff[2] << 8) | buff[3]) - cali_gyro.gy;
+    temp_gyro.gz = (int16_t)((buff[4] << 8) | buff[5]) - cali_gyro.gz;
+
+    // 对结果数据进低通滤波（低通滤波的第一个测量值最好是0，稳定之后再使用）
+    if (filter_enable) // 判断是否开启低通滤波
+    {
+      gyro_data->gx = Com_Filter_LowPass(temp_gyro.gx, gyro_data->gx);
+      gyro_data->gy = Com_Filter_LowPass(temp_gyro.gy, gyro_data->gy);
+      gyro_data->gz = Com_Filter_LowPass(temp_gyro.gz, gyro_data->gz);
+    }
+    else
+    {
+      gyro_data->gx = temp_gyro.gx;
+      gyro_data->gy = temp_gyro.gy;
+      gyro_data->gz = temp_gyro.gz;
+    }
   }
   else
   {
@@ -124,18 +139,32 @@ void Int_MPU6050_Get_Gyro(MPU6050_Gyro_t *gyro_data)
 }
 
 /**
- * @brief 获取加速度数据
+ * @brief 获取加速度数据（卡尔曼滤波，用于毛刺更多，抖动更大的数据）
  *
  * @param accel_data
  */
-void Int_MPU6050_Get_Accel(MPU6050_Accel_t *accel_data)
+void Int_MPU6050_Get_Accel(MPU6050_Accel_t *accel_data, uint8_t filter_enable)
 {
   uint8_t buff[6] = {0};
   if (HAL_I2C_Mem_Read(&hi2c1, MPU6050_I2C_ADDR, MPU6050_ACCE_REG, I2C_MEMADD_SIZE_8BIT, buff, 6, 1000) == HAL_OK)
   {
-    accel_data->ax = (int16_t)((buff[0] << 8) | buff[1]) - cali_accel.ax;
-    accel_data->ay = (int16_t)((buff[2] << 8) | buff[3]) - cali_accel.ay;
-    accel_data->az = (int16_t)((buff[4] << 8) | buff[5]) - cali_accel.az;
+    MPU6050_Accel_t temp_accel = {0};
+    temp_accel.ax = (int16_t)((buff[0] << 8) | buff[1]) - cali_accel.ax;
+    temp_accel.ay = (int16_t)((buff[2] << 8) | buff[3]) - cali_accel.ay;
+    temp_accel.az = (int16_t)((buff[4] << 8) | buff[5]) - cali_accel.az;
+
+    if (filter_enable)
+    {
+      accel_data->ax = Com_Filter_KalmanFilter(&kfs[0], temp_accel.ax);
+      accel_data->ay = Com_Filter_KalmanFilter(&kfs[1], temp_accel.ay);
+      accel_data->az = Com_Filter_KalmanFilter(&kfs[2], temp_accel.az);
+    }
+    else
+    {
+      accel_data->ax = temp_accel.ax;
+      accel_data->ay = temp_accel.ay;
+      accel_data->az = temp_accel.az;
+    }
   }
   else
   {

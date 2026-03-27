@@ -21,6 +21,8 @@
 #define MPU6050_ACCEL_SCALE 16384.0
 
 #include "i2c.h"
+#include "Com_Filter.h"
+#include <math.h>
 
 typedef struct
 {
@@ -46,14 +48,16 @@ void Int_MPU6050_Init(void);
  * @brief 获取陀螺仪数据
  *
  * @param gyro_data
+ * @param filter_enable 是否开启低通滤波
  */
-void Int_MPU6050_Get_Gyro(MPU6050_Gyro_t *gyro_data);
+void Int_MPU6050_Get_Gyro(MPU6050_Gyro_t *gyro_data, uint8_t filter_enable);
 
 /**
  * @brief 获取加速度数据
  *
  * @param accel_data
+ * @param filter_enable 是否开启低通滤波
  */
-void Int_MPU6050_Get_Accel(MPU6050_Accel_t *accel_data);
+void Int_MPU6050_Get_Accel(MPU6050_Accel_t *accel_data, uint8_t filter_enable);
 
 #endif /* __INT_MPU6050_H__ */
