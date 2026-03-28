@@ -854,6 +854,16 @@
               <FileType>5</FileType>
               <FilePath>..\Interface\Int_MPU6050.h</FilePath>
             </File>
+            <File>
+              <FileName>Int_qs100.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Interface\Int_qs100.c</FilePath>
+            </File>
+            <File>
+              <FileName>Int_qs100.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\Interface\Int_qs100.h</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>

@@ -30,6 +30,7 @@
 #include "Int_step.h"
 #include "Int_AT6558R.h"
 #include "Int_MPU6050.h"
+#include "Int_qs100.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -99,6 +100,7 @@ int main(void)
   MX_TIM3_Init();
   MX_I2C1_Init();
   MX_USART2_UART_Init();
+  MX_USART3_UART_Init();
   /* USER CODE BEGIN 2 */
 
   // 使用串口输出 -> 一个字节十位（起始位，停止位，8bit数据）-> 115200波特率相当于一秒发送 115200 / 10 = 11520字节，就是1ms 11个字节
@@ -135,7 +137,12 @@ int main(void)
   // Int_GPS_Init();
 
   // 陀螺仪测试
-  Int_MPU6050_Init();
+  // Int_MPU6050_Init();
+
+  // IOT芯片测试
+  Int_QS100_Init();
+  uint8_t msg[] = "hello world bro";
+  Int_QS100_send_msg(msg);
 
   /* USER CODE END 2 */
 
@@ -153,9 +160,12 @@ int main(void)
 
     // Int_MPU6050_Get_Gyro(&gyro_data, 1);
     // debug_printf("gyro: %.4f, %.4f, %.4f", gyro_data.gx, gyro_data.gy, gyro_data.gz);
-    Int_MPU6050_Get_Accel(&accel_data, 1);
-    debug_printf("acce: %.4f, %.4f, %.4f", accel_data.ax, accel_data.ay, accel_data.az);
-    HAL_Delay(10);
+    // Int_MPU6050_Get_Accel(&accel_data, 1);
+    // debug_printf("acce: %.4f, %.4f, %.4f", accel_data.ax, accel_data.ay, accel_data.az);
+    // HAL_Delay(10);
+
+    // Int_QS00_get_ip();
+    // HAL_Delay(1000);
 
     /* USER CODE END WHILE */
 

@@ -72,6 +72,8 @@ virtualFolder:
         - path: ../Interface/Int_AT6558R.h
         - path: ../Interface/Int_MPU6050.c
         - path: ../Interface/Int_MPU6050.h
+        - path: ../Interface/Int_qs100.c
+        - path: ../Interface/Int_qs100.h
       folders: []
     - name: ::CMSIS
       files: []

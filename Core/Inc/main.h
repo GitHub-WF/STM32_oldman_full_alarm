@@ -57,6 +57,8 @@ void Error_Handler(void);
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
+#define NB_WKUP_Pin GPIO_PIN_13
+#define NB_WKUP_GPIO_Port GPIOB
 #define LED_0_Pin GPIO_PIN_15
 #define LED_0_GPIO_Port GPIOA
 #define GPS_EN_Pin GPIO_PIN_3
