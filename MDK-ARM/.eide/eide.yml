@@ -23,6 +23,7 @@ virtualFolder:
                 - path: ../Core/Src/main.c
                 - path: ../Core/Src/gpio.c
                 - path: ../Core/Src/i2c.c
+                - path: ../Core/Src/spi.c
                 - path: ../Core/Src/tim.c
                 - path: ../Core/Src/usart.c
                 - path: ../Core/Src/stm32f1xx_it.c
@@ -45,6 +46,7 @@ virtualFolder:
             - path: ../Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_flash.c
             - path: ../Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_flash_ex.c
             - path: ../Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_exti.c
+            - path: ../Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_spi.c
             - path: ../Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_tim.c
             - path: ../Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_tim_ex.c
             - path: ../Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_uart.c
@@ -74,7 +76,16 @@ virtualFolder:
         - path: ../Interface/Int_MPU6050.h
         - path: ../Interface/Int_qs100.c
         - path: ../Interface/Int_qs100.h
-      folders: []
+      folders:
+        - name: lora
+          files:
+            - path: ../Interface/lora/driver_llcc68.c
+            - path: ../Interface/lora/driver_llcc68.h
+            - path: ../Interface/lora/driver_llcc68_interface.c
+            - path: ../Interface/lora/driver_llcc68_interface.h
+            - path: ../Interface/lora/Int_llcc68.c
+            - path: ../Interface/lora/Int_llcc68.h
+          folders: []
     - name: ::CMSIS
       files: []
       folders: []
@@ -97,6 +108,7 @@ targets:
         - ../Drivers/CMSIS/Include
         - ../Common
         - ../Interface
+        - ../Interface/lora
         - .cmsis/include
         - RTE/_location_hal
       libList: []

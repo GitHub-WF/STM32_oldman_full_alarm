@@ -19,6 +19,7 @@
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
 #include "i2c.h"
+#include "spi.h"
 #include "tim.h"
 #include "usart.h"
 #include "gpio.h"
@@ -31,6 +32,7 @@
 #include "Int_AT6558R.h"
 #include "Int_MPU6050.h"
 #include "Int_qs100.h"
+#include "Int_llcc68.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -101,12 +103,13 @@ int main(void)
   MX_I2C1_Init();
   MX_USART2_UART_Init();
   MX_USART3_UART_Init();
+  MX_SPI1_Init();
   /* USER CODE BEGIN 2 */
 
   // 使用串口输出 -> 一个字节十位（起始位，停止位，8bit数据）-> 115200波特率相当于一秒发送 115200 / 10 = 11520字节，就是1ms 11个字节
   // HAL_UART_Transmit(&huart1, "hello world", 11, 1000); // 耗时1ms 根据波特率115200计算
   // printf("hello world\r\n");
-  // debug_printf("hello world %d", 10);
+  debug_printf("hello world %d", 10);
 
   // 测试单色
   // Int_led_set(LED_RED);
@@ -140,9 +143,15 @@ int main(void)
   // Int_MPU6050_Init();
 
   // IOT芯片测试
-  Int_QS100_Init();
+  /* Int_QS100_Init();
   uint8_t msg[] = "hello world bro";
-  Int_QS100_send_msg(msg);
+  Int_QS100_send_msg(msg); */
+
+  /* Lora测试 */
+  Int_llcc68_init();
+
+  uint8_t msg[255];
+  uint16_t len = 0;
 
   /* USER CODE END 2 */
 
@@ -166,6 +175,20 @@ int main(void)
 
     // Int_QS00_get_ip();
     // HAL_Delay(1000);
+
+    // 发送数据
+    // Int_llcc68_send("hello world bro", 15);
+    // 接收数据
+    Int_llcc68_receive(msg, &len);
+    if (len > 0)
+    {
+      /* code */
+      debug_printf("receive %d bytes", len);
+      debug_printf("msg: %s", msg);
+      len = 0;
+      memset(msg, 0, sizeof(msg));
+    }
+
 
     /* USER CODE END WHILE */
 
