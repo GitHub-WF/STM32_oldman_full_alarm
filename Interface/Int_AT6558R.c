@@ -16,9 +16,35 @@ void Int_GPS_Init(void)
 {
   // 打开GPS
   HAL_GPIO_WritePin(GPS_EN_GPIO_Port, GPS_EN_Pin, GPIO_PIN_SET);
-
   HAL_Delay(100);
+
+  // 清空缓冲区
+  memset(gps_full_buff, 0, GPS_FULL_BUFFER_SIZE);
+  gps_full_buff_len = 0;
+  // GPS芯片发送完当次定位数据之后，会发送空闲帧数据，当做接受完整数据的标志
+  // HAL_UARTEx_ReceiveToIdle 是阻塞式接受，以下情况会跳过进入下一次执行
+  // 1. 达到超时时间或缓冲区接受满了 => GPS芯片未正常工作或缓冲区太小
+  // 2. 数据接收到了空闲帧
+
+  HAL_UARTEx_ReceiveToIdle_IT(&huart2, gps_full_buff, GPS_FULL_BUFFER_SIZE);
+  HAL_UARTEx_ReceiveToIdle_IT(&huart2, gps_full_buff, GPS_FULL_BUFFER_SIZE); // 烧录两次，解决errorCode问题，导致接受失败
+  debug_printf("init GPS ok");
 }
+
+// 编写对应接受数据的中断回调函数
+void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t Size)
+{
+  if (huart->Instance == USART2)
+  {
+    gps_full_buff_len = Size;
+    // GPS芯片发送完当次定位数据之后，会发送空闲帧数据，当做接受完整数据的标志
+    // HAL_UARTEx_ReceiveToIdle 是阻塞式接受，以下情况会跳过进入下一次执行
+    // 1. 达到超时时间或缓冲区接受满了 => GPS芯片未正常工作或缓冲区太小
+    // 2. 数据接收到了空闲帧
+    debug_printf("gps info: %s", gps_full_buff);
+  }
+}
+
 /**
  * @brief 数据校验
  *
@@ -67,19 +93,18 @@ NMEA_Type GPS_Get_Type(char *buff)
 
 void Int_GPS_Update_Data(void)
 {
-  // 清空缓冲区
+  /* // 清空缓冲区
   memset(gps_full_buff, 0, GPS_FULL_BUFFER_SIZE);
   gps_full_buff_len = 0;
   // GPS芯片发送完当次定位数据之后，会发送空闲帧数据，当做接受完整数据的标志
   // HAL_UARTEx_ReceiveToIdle 是阻塞式接受，以下情况会跳过进入下一次执行
   // 1. 达到超时时间或缓冲区接受满了 => GPS芯片未正常工作或缓冲区太小
   // 2. 数据接收到了空闲帧
-  HAL_UARTEx_ReceiveToIdle(&huart2, gps_full_buff, GPS_FULL_BUFFER_SIZE, &gps_full_buff_len, 1200);
+  HAL_UARTEx_ReceiveToIdle(&huart2, gps_full_buff, GPS_FULL_BUFFER_SIZE, &gps_full_buff_len, 1200); */
   if (gps_full_buff_len > 0)
   {
-
     // 处理数据
-    debug_printf("gps info: %s", gps_full_buff);
+    // debug_printf("gps info: %s", gps_full_buff);
     char *buff_p = (char *)gps_full_buff;
     // char *buff_p = "$GNGGA,081621.000,3106.67691,N,12113.52666,E,1,11,2.9,36.9,M,10.3,M,,*71\r\n$GNRMC,081621.000,A,3106.67691,N,12113.52666,E,0.00,0.00,040126,,,A,V*0D\r\n$GNVTG,0.00,T,,M,0.00,N,5.00,K,A*26\r\n";
 
@@ -157,7 +182,6 @@ void Int_GPS_Update_Data(void)
             break;
           }
           case NMEA_GNZDA: {
-            debug_printf("zda");
             strcpy(gps_data.time, single_data[1]);
             memset(gps_data.date, 0, sizeof(gps_data.date));
             sprintf((char *)gps_data.date, "%s%s%s",
@@ -176,5 +200,6 @@ void Int_GPS_Update_Data(void)
       }
       buff_p = end_p + 2;
     }
+    // debug_printf("GPS data, lat:%f, lat_dir:%c, lon:%f, lon_dir:%c, speed: %.4f, hdop: %.4f, date:%s, time:%s, sate:%d, fix_status: %d, timestamp: %.3f\r\n", gps_data.latitude, gps_data.lat_dir, gps_data.longitude, gps_data.long_dir, gps_data.speed_kph, gps_data.hdop, gps_data.date, gps_data.time, gps_data.satellites, gps_data.fix_status, gps_data.timestamp);
   }
 }

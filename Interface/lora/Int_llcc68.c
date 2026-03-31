@@ -264,7 +264,7 @@ uint8_t Int_llcc68_init(void)
 
       return 1;
   }
-
+  debug_printf("lora init ok");
   return 0;
 }
 
@@ -371,7 +371,7 @@ uint8_t Int_llcc68_set_send_mode(void)
  *            - 1 send failed
  * @note      none
  */
-uint8_t Int_llcc68_send(uint8_t *buf, uint16_t len)
+uint8_t Int_llcc68_send(char *buf, uint16_t len)
 {
   /* 设置发送模式 */
   Int_llcc68_set_send_mode();

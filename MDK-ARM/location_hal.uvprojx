@@ -340,7 +340,7 @@
               <MiscControls></MiscControls>
               <Define>USE_HAL_DRIVER,STM32F103xB</Define>
               <Undefine></Undefine>
-              <IncludePath>../Core/Inc;../Drivers/STM32F1xx_HAL_Driver/Inc;../Drivers/STM32F1xx_HAL_Driver/Inc/Legacy;../Drivers/CMSIS/Device/ST/STM32F1xx/Include;../Drivers/CMSIS/Include;../Common;../Interface;../Interface/lora</IncludePath>
+              <IncludePath>../Core/Inc;../Drivers/STM32F1xx_HAL_Driver/Inc;../Drivers/STM32F1xx_HAL_Driver/Inc/Legacy;../Drivers/CMSIS/Device/ST/STM32F1xx/Include;../Drivers/CMSIS/Include;../Common;../Interface;../Interface/lora;../App</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -911,6 +911,16 @@
               <FileType>5</FileType>
               <FilePath>..\Common\Com_Filter.h</FilePath>
             </File>
+            <File>
+              <FileName>cJSON.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Common\cJSON.c</FilePath>
+            </File>
+            <File>
+              <FileName>cJSON.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\Common\cJSON.h</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -1010,6 +1020,31 @@
               <FileName>Int_llcc68.h</FileName>
               <FileType>5</FileType>
               <FilePath>..\Interface\lora\Int_llcc68.h</FilePath>
+            </File>
+          </Files>
+        </Group>
+        <Group>
+          <GroupName>App</GroupName>
+          <Files>
+            <File>
+              <FileName>App_upload_data.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\App\App_upload_data.c</FilePath>
+            </File>
+            <File>
+              <FileName>App_upload_data.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\App\App_upload_data.h</FilePath>
+            </File>
+            <File>
+              <FileName>App_warning.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\App\App_warning.c</FilePath>
+            </File>
+            <File>
+              <FileName>App_warning.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\App\App_warning.h</FilePath>
             </File>
           </Files>
         </Group>

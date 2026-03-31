@@ -4,9 +4,9 @@
 #include "usart.h"
 #include "stdlib.h"
 
-#define QS100_BUFF_SIZE 512
+#define QS100_BUFF_SIZE 1024
 #define SERVER_IP "112.125.89.8"
-#define SERVER_PORT "33712"
+#define SERVER_PORT "34602"
 #define SEQUENCE_ID 1
 
 typedef enum
@@ -48,7 +48,7 @@ IOT_STATUS Int_QS100_connect_tcp(void);
  *
  * @return IOT_STATUS
  */
-IOT_STATUS Int_QS100_send(uint8_t *msg);
+IOT_STATUS Int_QS100_send(char *msg);
 
 /**
  * @brief 关闭TCP socket
@@ -63,6 +63,6 @@ IOT_STATUS Int_QS100_close_socket(uint8_t socket_link);
  * @brief 发送IOT消息到云服务器
  *
  */
-void Int_QS100_send_msg(uint8_t *msg);
+IOT_STATUS Int_QS100_send_msg(char *msg, uint8_t still_data);
 
 #endif /* __INT_QS100_H__ */

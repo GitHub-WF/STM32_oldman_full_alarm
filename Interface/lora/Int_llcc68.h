@@ -70,7 +70,7 @@ uint8_t Int_llcc68_set_send_mode(void);
  *            - 1 send failed
  * @note      none
  */
-uint8_t Int_llcc68_send(uint8_t *buf, uint16_t len);
+uint8_t Int_llcc68_send(char *buf, uint16_t len);
 
 /**
  * @brief 接收数据

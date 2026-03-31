@@ -4,7 +4,7 @@
 #include "usart.h"
 #include "stdlib.h"
 
-#define GPS_FULL_BUFFER_SIZE 512
+#define GPS_FULL_BUFFER_SIZE 1024
 #define GPS_LINE_BUFFER_SIZE 128
 
 // NMEA语句类型

@@ -24,6 +24,7 @@ void Int_MPU6050_Calibrate(void)
   while (1)
   {
     Int_MPU6050_Get_Gyro(&temp_gyro, 0);
+    HAL_Delay(10);
     Int_MPU6050_Get_Accel(&temp_accel, 0);
     if (fabs(temp_gyro.gx) < 300 && fabs(temp_gyro.gy) < 300 && fabs(temp_gyro.gz) < 300)
     {
@@ -38,7 +39,7 @@ void Int_MPU6050_Calibrate(void)
       sum_50_accel.ay += temp_accel.ay;
       sum_50_accel.az += (temp_accel.az - 16384);
 
-      HAL_Delay(10);
+      HAL_Delay(5);
     }
   }
   // 2.处于静止状态则用获取的 角速度/加速度 值减去50次平均漂移数据
@@ -56,8 +57,8 @@ void Int_MPU6050_Calibrate(void)
  */
 void Int_MPU6050_Init(void)
 {
-  /* uint8_t buff = Int_Mpu6050_Read_Reg(MPU6050_WHO_AM_I);
-  debug_printf("data: %#x", buff); */
+  // uint8_t buff = Int_Mpu6050_Read_Reg(MPU6050_WHO_AM_I);
+  // debug_printf("data: %#x---", buff);
 
   // 1.先将寄存器复位，然后从睡眠模式唤醒
   Int_Mpu6050_Write_Reg(MPU605_POWER_MANAGE_1, 0x80); // 复位
@@ -96,7 +97,7 @@ void Int_MPU6050_Init(void)
   // 12.零点误差处理
   Int_MPU6050_Calibrate();
 
-  debug_printf("init ok");
+  debug_printf("init MPU6050 ok");
 }
 
 /**
@@ -107,7 +108,8 @@ void Int_MPU6050_Init(void)
 void Int_MPU6050_Get_Gyro(MPU6050_Gyro_t *gyro_data, uint8_t filter_enable)
 {
   uint8_t buff[6] = {0};
-  if (HAL_I2C_Mem_Read(&hi2c1, MPU6050_I2C_ADDR, MPU6050_GYRO_REG, I2C_MEMADD_SIZE_8BIT, buff, 6, 1000)== HAL_OK)
+  uint8_t ret = HAL_I2C_Mem_Read(&hi2c1, MPU6050_I2C_ADDR, MPU6050_GYRO_REG, I2C_MEMADD_SIZE_8BIT, buff, 6, 1000);
+  if (ret == HAL_OK)
   {
     MPU6050_Gyro_t temp_gyro = {0};
     temp_gyro.gx = (int16_t)((buff[0] << 8) | buff[1]) - cali_gyro.gx;
@@ -146,7 +148,8 @@ void Int_MPU6050_Get_Gyro(MPU6050_Gyro_t *gyro_data, uint8_t filter_enable)
 void Int_MPU6050_Get_Accel(MPU6050_Accel_t *accel_data, uint8_t filter_enable)
 {
   uint8_t buff[6] = {0};
-  if (HAL_I2C_Mem_Read(&hi2c1, MPU6050_I2C_ADDR, MPU6050_ACCE_REG, I2C_MEMADD_SIZE_8BIT, buff, 6, 1000) == HAL_OK)
+  uint8_t ret = HAL_I2C_Mem_Read(&hi2c1, MPU6050_I2C_ADDR, MPU6050_ACCE_REG, I2C_MEMADD_SIZE_8BIT, buff, 6, 1000);
+  if (ret == HAL_OK)
   {
     MPU6050_Accel_t temp_accel = {0};
     temp_accel.ax = (int16_t)((buff[0] << 8) | buff[1]) - cali_accel.ax;

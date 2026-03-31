@@ -2,7 +2,10 @@
 
 uint8_t qs100_buff[QS100_BUFF_SIZE] = {0};
 uint8_t socket_link = 0;
+uint8_t is_connecting = 0;
 uint16_t get_count = 0;
+uint16_t sum_rx_len = 0;
+uint8_t count = 0;
 
 // 命令发送前钩子
 void Int_qs100_before_send_hook(uint8_t *cmd)
@@ -39,8 +42,8 @@ static void Int_QS100_send_cmd(uint8_t *cmd)
   HAL_UART_Transmit(&huart3, (uint8_t *)cmd, strlen((char*)cmd), 1000);
 
   // 3.接受数据
-  uint16_t sum_rx_len = 0;
-  uint8_t count = 0;
+  sum_rx_len = 0;
+  count = 0;
   while (strstr((char *)qs100_buff, "OK") == NULL && strstr((char *)qs100_buff, "ERROR") == NULL)
   {
     // 当没有收到OK或ERROR响应时，继续接收数据，直到接收到OK或ERROR响应，或者接收数据重试超过6次
@@ -74,6 +77,13 @@ void Int_QS100_Init(void)
   Int_QS100_send_cmd((uint8_t*)"ATE1\r\n");
   // 4.获取设备信息
   Int_QS100_send_cmd((uint8_t*)"AT+CGMR\r\n");
+  // 5.查询SIM卡状态
+  Int_QS100_send_cmd((uint8_t*)"AT+CPIN?\r\n");
+  // 6.查询信号强度
+  Int_QS100_send_cmd((uint8_t*)"AT+CSQ\r\n");
+  // 7.查询网络注册状态
+  Int_QS100_send_cmd((uint8_t*)"AT+CEREG?\r\n");
+  debug_printf("init QS100 ok");
 }
 
 /**
@@ -147,14 +157,14 @@ IOT_STATUS Int_QS100_connect_tcp(void)
  * @return IOT_STATUS
  */
 uint8_t msg_len = 0;
-uint8_t msg_hex[512] = {0}; // 单次数据最大长度为512 / 2字节
-IOT_STATUS Int_QS100_send(uint8_t *msg)
+uint8_t msg_hex[QS100_BUFF_SIZE] = {0}; // 单次数据最大长度为 1024 / 2 字节
+IOT_STATUS Int_QS100_send(char *msg)
 {
   // 清空缓冲区
   memset(cmd_buff, 0, sizeof(cmd_buff));
   memset(msg_hex, 0, sizeof(msg_hex));
 
-  msg_len = strlen((char*)msg);
+  msg_len = strlen(msg);
   // 将msg转换成16进制字符串
   for (uint16_t i = 0; i < msg_len; i++)
   {
@@ -244,33 +254,57 @@ IOT_STATUS Int_QS100_close_socket(uint8_t socket_link)
  * @brief 发送IOT消息
  *
  */
-void Int_QS100_send_msg(uint8_t *msg)
+// 重试次数
+uint8_t retry_count = 0;
+IOT_STATUS Int_QS100_send_msg(char *msg, uint8_t still_data)
 {
-  uint16_t len = strlen((char*)msg);
-  debug_printf("send msg: %s, len: %d", msg, len);
-  // 等待附着状态为1
-  while (Int_QS00_get_ip() != IOT_OK)
+  if (is_connecting == 0)
   {
-    HAL_Delay(1000);
-  }
-  // 创建TCP socket
-  while (Int_QS100_open_socket() != IOT_OK)
-  {
-    HAL_Delay(1000);
-  }
-  // 创建TCP连接
-  while (Int_QS100_connect_tcp() != IOT_OK)
-  {
-    HAL_Delay(1000);
+    // 等待附着状态为1
+    retry_count = 0;
+    while (Int_QS00_get_ip() != IOT_OK && retry_count < 3)
+    {
+      retry_count++;
+      if(retry_count >= 3)
+      {
+        debug_printf("wait ip failed");
+        return IOT_ERROR;
+      }
+      HAL_Delay(1000);
+    }
+    // 创建TCP socket
+    while (Int_QS100_open_socket() != IOT_OK)
+    {
+      HAL_Delay(1000);
+    }
+    // TCP连接
+    retry_count = 0;
+    while (Int_QS100_connect_tcp() != IOT_OK && retry_count < 3)
+    {
+      retry_count++;
+      if (retry_count >= 3)
+      {
+        debug_printf("connect tcp failed");
+        return IOT_ERROR;
+      }
+
+      HAL_Delay(1000);
+    }
+    is_connecting = 1;
   }
   // 发送TCP消息
   while (Int_QS100_send(msg) != IOT_OK)
   {
     HAL_Delay(1000);
   }
-  // 关闭TCP连接
-  while (Int_QS100_close_socket(socket_link) != IOT_OK)
+  if (still_data == 0)
   {
-    HAL_Delay(1000);
+    // 关闭TCP连接
+    while (Int_QS100_close_socket(socket_link) != IOT_OK)
+    {
+      HAL_Delay(1000);
+    }
+    is_connecting = 0;
   }
+  return IOT_OK;
 }
