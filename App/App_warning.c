@@ -58,7 +58,7 @@ uint8_t App_warning_get_status(void)
     }
 
     is_fall = 1;
-    for (uint8_t i = 0; i < 3; i++)
+    for (uint8_t i = 0; i < 5; i++)
     {
       if ((accel_sum[i] < (2.5 * MPU6050_ACCEL_SCALE)) || (gyro_sum[i] < (70 * MPU6050_GYRO_SCALE)))
       {
@@ -89,7 +89,7 @@ uint8_t App_warning_get_status(void)
         // 可能是在跑步
         // debug_printf("老人在跑步");
         is_fall = 0;
-        debug_printf("老人在跑步 %d", steps);
+        debug_printf("running %d", steps);
       }
     }
 

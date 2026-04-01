@@ -39,7 +39,7 @@ void App_upload_data(uint8_t warning_status)
   cJSON *gyro_accel = cJSON_CreateObject();
   cJSON_AddItemToObject(json, "gyro_accel", gyro_accel);
   // 角速度
-  uint8_t buf[16] = {0};
+  uint8_t buf[32] = {0};
   sprintf((char *)buf, "%.4f", gyro_data.gx);
   cJSON_AddStringToObject(gyro_accel, "gyro_x", (char *)buf);
   sprintf((char *)buf, "%.4f", gyro_data.gy);

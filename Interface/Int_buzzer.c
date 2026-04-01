@@ -39,7 +39,7 @@ void Int_buzzer_set(uint16_t freq)
 void Int_buzer_play(void)
 {
   uint8_t music[] = {1,1,5,5,6,6,5,0,4,4,3,3,2,2,1,0};
-  for (size_t i = 0; i < sizeof(music) / music[0]; i++)
+  for (int i = 0; i < sizeof(music) / sizeof(music[0]); i++)
   {
     debug_printf("freq = %d", music[i]);
 

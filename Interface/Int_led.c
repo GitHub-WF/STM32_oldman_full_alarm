@@ -63,7 +63,7 @@ static void Int_led_send_bit(uint8_t bit)
 
 void Int_led_set(uint32_t data)
 {
-  for (size_t i = 24; i >= 1; i--)
+  for (int i = 24; i >= 1; i--)
   {
     Int_led_send_bit((data >> (i - 1)) & 0x01);
   }

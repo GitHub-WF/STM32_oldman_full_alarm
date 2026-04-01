@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(wc -l \"d:\\\\资料夹\\\\2.学习\\\\F.嵌入式\\\\4.代码\\\\3.Wrokspace\\\\32_Projects\\\\location_hal\"/Interface/lora/*.c)",
+      "Bash(xargs wc:*)"
+    ]
+  }
+}
